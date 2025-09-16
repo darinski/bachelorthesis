@@ -1,12 +1,12 @@
 # Bachelor Thesis
 
-This repository contains the implementation of my bachelor thesis.
-Title: "Privacy-Preserving Logistic Regression Training using Multi-Party Computation in a Malicious Setting"
+This repository contains the implementation of my bachelor thesis.  
+**Title:** _"Privacy-Preserving Logistic Regression Training using Multi-Party Computation in a Malicious Setting"_
 
-Chair of Theoretical Computer Science
-University of Mannheim
-Supervisors: Jasmin Zalonis, Prof. Dr. Matthias Krause
-Submission Date: October 28, 2025
+_Chair of Theoretical Computer Science_  
+_University of Mannheim_  
+_Supervisors: Jasmin Zalonis, Prof. Dr. Matthias Krause_  
+_Submission Date: October 28, 2025_
 
 ## Structure
 
