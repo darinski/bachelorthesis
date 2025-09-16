@@ -1,0 +1,7 @@
+# Ignore Python cache/compiled files
+
+__pycache__/
+*.py[cod]
+
+# Ignored data 
+data/*
