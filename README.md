@@ -14,3 +14,11 @@ _Submission Date: October 28, 2025_
 -   `results/`- results, figures, and analysis outputs
 -   `src/` - implementation (data preprocessing, MPC, training, evaluation, etc.)
 -   `tests/`- unit tests
+
+## Data Requirements
+
+-
+
+### Data Sources
+
+breast cancer data: https://www.kaggle.com/datasets/uciml/breast-cancer-wisconsin-data?resource=download
