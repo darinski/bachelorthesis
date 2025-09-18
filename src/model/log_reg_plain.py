@@ -4,10 +4,10 @@ from pathlib import Path
 project_root = Path(__file__).resolve().parents[2]
 sys.path.append(str(project_root))
 
-from src.preprocessing.datasetLoader import load_breastcancer_data
+from src.preprocessing.datasetLoader import load_data
 import numpy as np
 
-df = load_breastcancer_data()
+df = load_data('trainingLBW')
 
 # logisitc regression model
 from sklearn.model_selection import train_test_split
@@ -15,8 +15,9 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
 
-X = df.drop(columns=['diagnosis'], axis=1) # features
-y = df['diagnosis'] # target 
+
+X = df.drop(columns=[df.columns[-1]], axis=1) # features
+y = df.iloc[:, -1] # target
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
 
 scaler = StandardScaler()

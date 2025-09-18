@@ -41,3 +41,8 @@ def load_breastcancer_data():
 
 
     return df
+
+# for already cleanded datasets
+def load_data(name):
+    df = pd.read_csv(f'data/{name}.csv')
+    return df
