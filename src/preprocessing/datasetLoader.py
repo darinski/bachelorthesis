@@ -4,16 +4,14 @@ import pandas as pd
 ## Example: Breast Cancer Wisconsin (Diagnostic) Data Set
 ## Requirements for dataset: cleaned, no missing values
 
-df = pd.read_csv('data/breastcancer_data.csv')
-
+df = pd.read_csv("data/breastcancer_data.csv")
 
 
 def load_breastcancer_data():
-    df = pd.read_csv('data/breastcancer_data.csv')
-    df['diagnosis'] = df['diagnosis'].map({'M': 1, 'B': 0})  # M=1, B=0
-    df['diagnosis'] = df['diagnosis'].astype(int)
-    df = df.drop(columns=['id'])  
-
+    df = pd.read_csv("data/breastcancer_data.csv")
+    df["diagnosis"] = df["diagnosis"].map({"M": 1, "B": 0})  # M=1, B=0
+    df["diagnosis"] = df["diagnosis"].astype(int)
+    df = df.drop(columns=["id"])
 
     # print("df HEAD:")
     # print(df.head(), "\n")
@@ -39,10 +37,10 @@ def load_breastcancer_data():
     # print("df DUPLICATES:")
     # print(df.duplicated().sum(), "\n")
 
-
     return df
+
 
 # for already cleanded datasets
 def load_data(name):
-    df = pd.read_csv(f'data/{name}.csv')
+    df = pd.read_csv(f"data/{name}.csv")
     return df

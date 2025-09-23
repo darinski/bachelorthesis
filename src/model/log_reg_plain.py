@@ -7,7 +7,7 @@ sys.path.append(str(project_root))
 from src.preprocessing.datasetLoader import load_data
 import numpy as np
 
-df = load_data('trainingLBW')
+df = load_data("trainingLBW")
 
 # logisitc regression model
 from sklearn.model_selection import train_test_split
@@ -16,9 +16,11 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
 
 
-X = df.drop(columns=[df.columns[-1]], axis=1) # features
-y = df.iloc[:, -1] # target
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
+X = df.drop(columns=[df.columns[-1]], axis=1)  # features
+y = df.iloc[:, -1]  # target
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42, stratify=y
+)
 
 scaler = StandardScaler()
 X_train = scaler.fit_transform(X_train)
@@ -36,3 +38,7 @@ print("Confusion matrix:\n", confusion_matrix(y_test, y_pred))
 
 # detailed classification report
 print(classification_report(y_test, y_pred))
+
+# coefficients
+print("Model coefficients:", model.coef_)
+print("Model intercept:", model.intercept_)
