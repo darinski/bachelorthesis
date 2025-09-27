@@ -1,5 +1,9 @@
+# sklearn version
+
+# load data
 import sys
 from pathlib import Path
+import pandas as pd
 
 project_root = Path(__file__).resolve().parents[2]
 sys.path.append(str(project_root))
@@ -29,6 +33,9 @@ X_test = scaler.transform(X_test)
 model = LogisticRegression(max_iter=1000)
 model.fit(X_train, y_train)
 y_pred = model.predict(X_test)
+
+df_result = pd.DataFrame(y_pred, columns=["Prediction"])
+df_result.to_csv("src/results/log_reg_plain.csv", index=True)
 
 # accuracy
 print("Accuracy:", accuracy_score(y_test, y_pred))
