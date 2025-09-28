@@ -24,3 +24,40 @@ git clone https://github.com/data61/MP-SPDZ.git
 cd MP-SPDZ
 make -j8
 make libote
+
+To run the repo the creation of a my*mpc file (name changeable) is necessary.
+For that, after cloning the MP-SPDZ repo from github in a third_party folder run from inside *third_party/MP-SPDZ/Programs/Source* following command:
+
+```bash
+ln -s ../../../../src/mpc my_mpc
+```
+To check if everything went right run **ls -l** and check for 
+```bash
+my_mpc -> ../../../../src/mpc
+```
+
+Also, make sure you have following structure of your Repo (some folders aren't shown for iverview reasons):
+```text
+bachelorthesis
+- .venv/
+- data
+-- trainingLBW.csv
+-src
+-- mpc
+--- convert_to_mpspdz.mpc
+-- preprocessing
+--- datasetLoader.py
+- third_party
+-- MP_SPDZ
+--- Programs
+---- Source
+----- my_mpc
+------convert_to_mpspdz.mpc
+--- Scripts
+```
+
+With that you should be able to run compile the convert_to_mpspdz.mpc file in the src/mpc folder with like following:
+In **/bachelorthesis/src/mpc** run:
+```bash
+../../third_party/MP-SPDZ/Scripts/compile-run.py -E ring my_mpc/convert_to_mpspdz
+```

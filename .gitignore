@@ -6,6 +6,10 @@ __pycache__/
 # Ignored data 
 data/*
 
-
 # Ignore third_party elements
 third_party/MP-SPDZ/
+
+# MP-SPDZ generated files
+src/mpc/logs/
+src/mpc/Player-Data/
+src/mpc/Programs/
