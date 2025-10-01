@@ -61,3 +61,30 @@ In **/bachelorthesis/src/mpc** run:
 ```bash
 ../../third_party/MP-SPDZ/Scripts/compile-run.py -E ring my_mpc/convert_to_mpspdz
 ```
+
+### OT
+
+In third_party folder execute
+```bash
+brew install cmake # in bacherlorthesis folder
+git clone https://github.com/osu-crypto/libOTe.git # in third_party folder 
+cd libOTe 
+git submodule update --init --recursive # in libOTe folder
+python3 build.py --all --boost --sodium # in libOTe folder
+# tell MP-SPDZ where libOTe lives
+export LIBOTE_ROOT=~/bachelorthesis/third_party/libOTe 
+export CRYPTOTOOLS_ROOT=~/bachelorthesis/third_party/libOTe/cryptoTools
+
+```
+[Github libOTe for more details](https://github.com/osu-crypto/libOTe)
+
+
+
+In MPC folder execute
+```bash
+make -j8
+make libote
+```
+
+
+
