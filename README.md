@@ -87,4 +87,17 @@ make libote
 ```
 
 
-
+### Example Run tutorial
+in *~/git/bachelorthesis/third_party/MP-SPDZ*
+- **terminal 0**
+```bash
+./compile.py tutorial 
+```
+- **terminal 1** 
+```bash
+./mascot-party.x -p 0 -N 2 --ip-file-name hosts.txt -pn 6000 tutorial 
+```
+- **terminal 2**
+```bash
+./mascot-party.x -p 1 -N 2 --ip-file-name hosts.txt -pn 6000 tutorial 
+```

@@ -10,8 +10,11 @@ import pandas as pd
 # for already cleanded datasets
 def load_data(name):
 
-    project_root = Path(sys.argv[0]).resolve().parents[3]  # bachelorthesis/
+    project_root = Path(sys.argv[0]).resolve().parents[2] 
     data_path = project_root / "data" / f"{name}.csv"
+    # print("[DEBUG] Using project_root:", project_root)
     df = pd.read_csv(data_path)
 
     return df
+
+load_data("trainingLBW")

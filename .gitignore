@@ -1,5 +1,4 @@
 # Ignore Python cache/compiled files
-
 __pycache__/
 *.py[cod]
 
@@ -9,7 +8,5 @@ data/*
 # Ignore third_party elements
 third_party/MP-SPDZ/
 
-# MP-SPDZ generated files
-src/mpc/logs/
-src/mpc/Player-Data/
-src/mpc/Programs/
+# Ignore runtime data
+Player-Data/
