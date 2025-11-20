@@ -1,7 +1,0 @@
-# logisitc model in mpc
-
-from Compiler.types import sfix, sint, Matrix
-from convert_to_mpspdz import n_parties
-
-# -- 
-n_parties 

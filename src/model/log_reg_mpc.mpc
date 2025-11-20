@@ -1,0 +1,56 @@
+# Logistic Regression in MPC
+
+meta_file = open("Player-Data/meta.json", "w")
+meta = json_load(meta_file)
+meta_file.close()
+
+n = meta["n_samples"]  # rows
+d = meta["n_features"]  # features
+scale = meta["scale"]
+
+print_ln("Loaded metadata: n=%s, d=%s, scale=%s", n, d, scale)
+
+X = sfix.Matrix(n, d).input_from(0)  # Player 0 inputs features
+y = sint.Array(n).input_from(0)  # Player 0 inputs labels
+
+learning_rate = sfix(0.01)
+epochs = 20
+
+# =================================
+# Initialize model parameters
+# =================================
+w = sfix.Array(d)
+for j in range(d):
+    w[j] = sfix(0)
+
+
+def sigmoid(z):
+    return 1 / (1 + exp(-z))
+
+
+for e in range(epochs):
+    print_ln("Epoch %s/%s", e + 1, epochs)
+
+    grad = sfix.Array(d)
+    for j in range(d):
+        grad[j] = sfix(0)
+
+    for i in range(n):
+        z = sfix(0)
+        for j in range(d):
+            z += X[i][j] * w[j]
+
+        pred = sigmoid(z)
+        error = pred - sfix(y[i])
+
+        for j in range(d):
+            grad[j] += error * X[i][j]
+
+    for j in range(d):
+        w[j] = w[j] - learning_rate * grad[j]
+
+
+print_ln("Training complete. \n")
+print_ln("Model weights: \n")
+for j in range(d):
+    w[j].reveal().print_reg()

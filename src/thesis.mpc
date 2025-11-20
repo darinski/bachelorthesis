@@ -1,0 +1,95 @@
+# Logistic Regression in MPC
+from Compiler.library import *
+from Compiler import ml
+import numpy as np
+
+
+# =================================
+# Read metadata
+# =================================
+program.use_edabit(True)
+with open("Player-Data/metadata.txt") as meta_f:
+    n_train = int(meta_f.readline().strip())
+    d = int(meta_f.readline().strip())
+    n_test = int(meta_f.readline().strip())
+    
+
+# secure rounding for fixed-point numbers
+sfix.set_precision(f=16, k=78)
+sfix.round_nearest = True
+
+print_ln("Loaded metadata: n_train=%s, d=%s, n_test=%s", n_train, d, n_test)
+
+
+# =================================
+# Loading Data
+# =================================
+
+train0 = np.loadtxt("Player-Data/Input-P0-0")
+train1 = np.loadtxt("Player-Data/Input-P1-0")
+test0 = np.loadtxt("Player-Data/Input-P0-1")
+test1 = np.loadtxt("Player-Data/Input-P1-1")
+
+train_share0 = sfix.input_tensor_via(0, train0)
+train_share1 = sfix.input_tensor_via(1, train1)
+test_share0 = sfix.input_tensor_via(0, test0)
+test_share1 = sfix.input_tensor_via(1, test1)
+
+# reconstruct secret shared matrices
+train_secret = train_share0 + train_share1
+test_secret  = test_share0  + test_share1
+
+# =================================
+# Build X_train and y_train with FOR LOOPS
+# =================================
+
+X_train = sfix.Matrix(n_train, d)
+y_train = sint.Array(n_train)
+
+for i in range(n_train):
+    for j in range(d):
+        X_train[i][j] = train_secret[i][j]
+    y_train[i] = train_secret[i][d]
+
+
+
+# =================================
+# Build X_test and y_test with FOR LOOPS
+# =================================
+
+X_test = sfix.Matrix(n_test, d)
+y_test = sint.Array(n_test)
+
+for i in range(n_test):
+    for j in range(d):
+        X_test[i][j] = test_secret[i][j]
+    y_test[i] = test_secret[i][d]
+
+
+# =================================
+# Helpers and Variables
+# =================================
+
+def poly3(x):
+    # # # good for MPC, paper: SecureML (CCS 2017)
+    return sfix(0.5) + x * sfix(0.25)
+
+
+# =================================
+# Logistic Regression
+# =================================
+log = ml.SGDLogistic(n_epochs=3, batch_size=8, program=program)
+log.sigmoid = poly3
+
+#print_ln("Predictions on training set:")
+#log.fit_with_testing(X_train, y_train, X_test, y_test)
+
+log.fit(X_train, y_train)
+pred = log.predict(X_test)
+
+
+f = open("Player-Data/predictions.txt", "w")
+
+for i in range(n_test):
+    diff = (pred[i] - y_test[i]).reveal()
+    f.write(f"{diff}\n")
