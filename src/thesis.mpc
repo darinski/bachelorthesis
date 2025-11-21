@@ -15,6 +15,7 @@ with open("Player-Data/metadata.txt") as meta_f:
     
 
 # secure rounding for fixed-point numbers
+
 sfix.set_precision(f=16, k=78)
 sfix.round_nearest = True
 
@@ -78,16 +79,32 @@ def poly3(x):
 # =================================
 # Logistic Regression
 # =================================
-log = ml.SGDLogistic(n_epochs=10, batch_size=8, program=program)
+log = ml.SGDLogistic(n_epochs=1, batch_size=8, program=program)
 log.sigmoid = poly3
 
 #print_ln("Predictions on training set:")
 #log.fit_with_testing(X_train, y_train, X_test, y_test)
 
 log.fit(X_train, y_train)
-pred = log.predict(X_test)             
-pred_revealed = (pred - y_test).reveal()
+pred = log.predict(X_test)
 
-f = open("Player-Data/predictions.txt", "w")
-for x in pred_revealed:
-    f.write("%s\n", x) 
+
+pred_clear = pred.reveal_list()
+
+
+# print predictions
+for i in range(n_test):
+    print(f"Prediction[{i}] = {pred_clear[i]}")
+
+
+
+print_ln("Daria")
+for i in range(n_test):
+    print_ln("pred %s = %s", i, pred_clear[i])   # printed decoded? might still be integer; better postprocess
+
+print_ln("von Doc")
+print_ln('%s', pred.reveal())
+print_ln("DONE")
+
+print_ln('%s', (pred - y_test.get_vector()).reveal())
+print_ln("DONE2")
