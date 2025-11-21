@@ -3,7 +3,7 @@ __pycache__/
 *.py[cod]
 
 # Ignored data 
-data/*
+
 
 # Ignore third_party elements
 third_party/MP-SPDZ/
