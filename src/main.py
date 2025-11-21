@@ -46,6 +46,12 @@ def setup_mpspdz():
 
     subprocess.run(["git", "pull"], cwd=str(MP_SPDZ_DIR), check=True)
 
+def build_mpspdz_runtime():
+    print("[INFO] Building MP-SPDZ binaries (this may take a while)...")
+    subprocess.run(["make", "-j", "8"], cwd=str(MP_SPDZ_DIR), check=True)
+    print("[INFO] Build completed.")
+
+
 # =============================
 # 3. Prepare Sources
 # ============================
@@ -143,8 +149,9 @@ def run_mpc():
 print(BASE_DIR)
 print(ENV_DIR)
 
-#setup_env()
-#setup_mpspdz()
+setup_env()
+setup_mpspdz()
+build_mpspdz_runtime()
 prepare_sources()
 run_preprocessing()
 compile_mpc()
