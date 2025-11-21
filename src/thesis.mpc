@@ -78,18 +78,16 @@ def poly3(x):
 # =================================
 # Logistic Regression
 # =================================
-log = ml.SGDLogistic(n_epochs=3, batch_size=8, program=program)
+log = ml.SGDLogistic(n_epochs=10, batch_size=8, program=program)
 log.sigmoid = poly3
 
 #print_ln("Predictions on training set:")
 #log.fit_with_testing(X_train, y_train, X_test, y_test)
 
 log.fit(X_train, y_train)
-pred = log.predict(X_test)
-
+pred = log.predict(X_test)             
+pred_revealed = (pred - y_test).reveal()
 
 f = open("Player-Data/predictions.txt", "w")
-
-for i in range(n_test):
-    diff = (pred[i] - y_test[i]).reveal()
-    f.write(f"{diff}\n")
+for x in pred_revealed:
+    f.write("%s\n", x) 

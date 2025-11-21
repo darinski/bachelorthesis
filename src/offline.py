@@ -5,7 +5,7 @@ import secrets
 from sklearn.model_selection import train_test_split
 import numpy as np
 
-DEFAULT_SCALE = 10**6
+DEFAULT_SCALE = 2**16
 DEFAULT_P = 2**61 - 1
 DEFAULT_TEST_SIZE = 0.2
 OUTPUT_DIR = "Player-Data"
