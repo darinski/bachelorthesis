@@ -3,10 +3,6 @@ import subprocess
 from pathlib import Path
 
 BASE_DIR = Path(__file__).parents[1].resolve()       # bachelorthesis folder
-
-ENV_DIR = BASE_DIR / ".venv"
-PYTHON = ENV_DIR / "bin/python"                 # path to python inside .env
-
 SRC_DIR = BASE_DIR / "src"
 
 MY_PROGRAM = "thesis"
@@ -15,24 +11,29 @@ PREPROCESSING_SCRIPT = "offline.py"
 MP_SPDZ_DIR = BASE_DIR / "third_party/MP-SPDZ"              # adjust if your MP-SPDZ folder name differs
 MP_SPDZ_SOURCE_DIR = MP_SPDZ_DIR / "Programs/Source"
 
-
-
 files_to_link = [PREPROCESSING_SCRIPT, f"{MY_PROGRAM}.mpc"]
 DATASET = "trainingPCS"
 
+CONDA_ENV_NAME = "thesis"
+PYTHON_VERSION = "3.11"
+
 
 # =============================
-# 1. Activate virtual environment and install packages
+# 1. Setup Conda Environment
 # =============================
 
-def setup_env():
-    if not ENV_DIR.exists():
-        print(f"[INFO] Creating virtual environment at {ENV_DIR}...")
-        subprocess.run([sys.executable, "-m", "venv", str(ENV_DIR)], check=True)
-
-    print("Installing required packages...")
-    subprocess.run([str(PYTHON), "-m", "pip", "install", "--upgrade", "pip"], check=True)
-    subprocess.run([str(PYTHON), "-m", "pip", "install", "-r", str(BASE_DIR / "requirements.txt")], check=True)
+def setup_conda_env():
+    # check if environment exists
+    result = subprocess.run(["conda", "env", "list"], capture_output=True, text=True)
+    if CONDA_ENV_NAME not in result.stdout:
+        print(f"[INFO] Creating conda environment '{CONDA_ENV_NAME}' with Python {PYTHON_VERSION}...")
+        subprocess.run(["conda", "create", "-n", CONDA_ENV_NAME, f"python={PYTHON_VERSION}", "-y"], check=True)
+    else:
+        print(f"[INFO] Conda environment '{CONDA_ENV_NAME}' already exists.")
+    
+    print("[INFO] Installing Python packages from requirements.txt...")
+    subprocess.run(["conda", "run", "-n", CONDA_ENV_NAME, "pip", "install", "--upgrade", "pip"], check=True)
+    subprocess.run(["conda", "run", "-n", CONDA_ENV_NAME, "pip", "install", "-r", str(BASE_DIR / "requirements.txt")], check=True)
 
 
 # =============================
@@ -58,9 +59,8 @@ def build_mpspdz_runtime():
 
 def prepare_sources():
     print("[INFO] Preparing MP-SPDZ source directory...")
-
     MP_SPDZ_SOURCE_DIR.mkdir(parents=True, exist_ok=True)
-    print(f"       Directory created or already exists: {MP_SPDZ_SOURCE_DIR}")
+    #print(f"       Directory created or already exists: {MP_SPDZ_SOURCE_DIR}")
 
     for file_name in files_to_link:
         src_file = (SRC_DIR / file_name).resolve()
@@ -93,7 +93,7 @@ def run_preprocessing():
         raise FileNotFoundError(f"Symlinked preprocessing script not found: {offline_script}")
 
     print("[INFO] Running preprocessing script inside MP-SPDZ...")
-    subprocess.run([str(PYTHON), str(offline_script), DATASET], cwd=str(MP_SPDZ_DIR), check=True)
+    subprocess.run(["conda", "run", "-n", CONDA_ENV_NAME, "python", str(offline_script), DATASET], cwd=str(MP_SPDZ_DIR), check=True)
     print("[INFO] Preprocessing completed.")
 
 # =============================
@@ -105,7 +105,7 @@ def compile_mpc():
     
     try:
         result = subprocess.run(
-            ["./compile.py", MY_PROGRAM],
+            ["conda", "run", "-n", CONDA_ENV_NAME, "./compile.py", MY_PROGRAM],
             cwd=str(MP_SPDZ_DIR),
             check=True,
             text=True,
@@ -130,7 +130,8 @@ def run_mpc():
     print(f"[INFO] Running MPC program ({MY_PROGRAM}) with 2 parties...")
     
     for party_id in range(n_parties):
-        cmd = [
+        cmd = [ 
+            "conda", "run", "-n", CONDA_ENV_NAME,
             "./mascot-party.x",
             str(party_id),
             MY_PROGRAM,
@@ -147,9 +148,8 @@ def run_mpc():
     print("[INFO] MPC execution completed.")
 
 print(BASE_DIR)
-print(ENV_DIR)
 
-setup_env()
+setup_conda_env()
 setup_mpspdz()
 build_mpspdz_runtime()
 prepare_sources()
