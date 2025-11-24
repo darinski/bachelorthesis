@@ -2,6 +2,8 @@
 from Compiler.library import *
 from Compiler import ml
 import numpy as np
+import pandas as pd
+
 
 
 # =================================
@@ -19,26 +21,55 @@ with open("Player-Data/metadata.txt") as meta_f:
 sfix.set_precision(f=16, k=78)
 sfix.round_nearest = True
 
-print_ln("Loaded metadata: n_train=%s, d=%s, n_test=%s", n_train, d, n_test)
 
+print_ln("Loaded metadata: n_train=%s, d=%s, n_test=%s", n_train, d, n_test)
 
 # =================================
 # Loading Data
 # =================================
 
-train0 = np.loadtxt("Player-Data/Input-P0-0")
-train1 = np.loadtxt("Player-Data/Input-P1-0")
-test0 = np.loadtxt("Player-Data/Input-P0-1")
-test1 = np.loadtxt("Player-Data/Input-P1-1")
+train0 = np.loadtxt("Player-Data/Input-P0-0", dtype=np.int64)
+train1 = np.loadtxt("Player-Data/Input-P1-0", dtype=np.int64)
+# train0 = pd.read_csv("Player-Data/Input-P0-0", sep=" ", header=None, dtype=int).values
+# train1 = pd.read_csv("Player-Data/Input-P1-0", sep=" ", header=None, dtype=int).values
+test0 = np.loadtxt("Player-Data/Input-P0-1", dtype=np.int64)
+test1 = np.loadtxt("Player-Data/Input-P1-1", dtype=np.int64)
 
-train_share0 = sfix.input_tensor_via(0, train0)
-train_share1 = sfix.input_tensor_via(1, train1)
-test_share0 = sfix.input_tensor_via(0, test0)
-test_share1 = sfix.input_tensor_via(1, test1)
+# print_ln(train0)
+
+# quick shape check for debugging (revealed to console)
+print_ln("Loaded shapes: train0=%s, train1=%s, test0=%s, test1=%s",
+         str(train0.shape), str(train1.shape), str(test0.shape), str(test1.shape))
+
+# print_ln(train0)
+
+train_share0 = sint.input_tensor_via(0, train0)
+train_share1 = sint.input_tensor_via(1, train1)
+test_share0 = sint.input_tensor_via(0, test0)
+test_share1 = sint.input_tensor_via(1, test1)
+
+# train_share0 = sint.input_tensor_via(0, train0)
+# train_share1 = sint.input_tensor_via(1, train1)
+# test_share0 = sint.input_tensor_via(0, test0)
+# test_share1 = sint.input_tensor_via(1, test1)
+# print_ln("%s", train_share0.reveal())
 
 # reconstruct secret shared matrices
 train_secret = train_share0 + train_share1
 test_secret  = test_share0  + test_share1
+
+# # For train_share0
+# train_share0_clear = train_share0.reveal_list()
+# print_ln("train_share0 = %s", train_share0_clear)
+
+# # For train_share1
+# train_share1_clear = train_share1.reveal_list()
+# print_ln("train_share1 = %s", train_share1_clear)
+
+# # For train_secret
+# train_secret_clear = train_secret.reveal_list()
+# print_ln("train_secret = %s", train_secret_clear)
+
 
 # =================================
 # Build X_train and y_train with FOR LOOPS
@@ -50,7 +81,8 @@ y_train = sint.Array(n_train)
 for i in range(n_train):
     for j in range(d):
         X_train[i][j] = train_secret[i][j]
-    y_train[i] = train_secret[i][d]
+    y_train[i] = train_secret[i][d] 
+    # print_ln("y_train[%s] = %s", i, y_train[i].reveal())
 
 
 
@@ -64,7 +96,7 @@ y_test = sint.Array(n_test)
 for i in range(n_test):
     for j in range(d):
         X_test[i][j] = test_secret[i][j]
-    y_test[i] = test_secret[i][d]
+    y_test[i] = test_secret[i][d] 
 
 
 # =================================
@@ -79,32 +111,29 @@ def poly3(x):
 # =================================
 # Logistic Regression
 # =================================
-log = ml.SGDLogistic(n_epochs=1, batch_size=8, program=program)
-log.sigmoid = poly3
+import os
 
-#print_ln("Predictions on training set:")
-#log.fit_with_testing(X_train, y_train, X_test, y_test)
-
-log.fit(X_train, y_train)
-pred = log.predict(X_test)
+# batch_size = int(os.getenv("THESIS_BATCH", "50"))
+log = ml.SGDLogistic(n_epochs=3, batch_size=8, program=program)
+# log.sigmoid = poly3
 
 
-pred_clear = pred.reveal_list()
+# If y_train is sfix or sint
+# y_train_clear = y_train.reveal()  # returns Python list of floats or ints
+# print_ln("y_train = %s", y_train_clear)
 
 
-# print predictions
-for i in range(n_test):
-    print(f"Prediction[{i}] = {pred_clear[i]}")
+# print_ln("Fit with test")
+
+log.fit_with_testing(X_train, y_train, X_test, y_test)
 
 
+# convert dict of lists to DataFrame
+# df = pd.DataFrame(results)
 
-print_ln("Daria")
-for i in range(n_test):
-    print_ln("pred %s = %s", i, pred_clear[i])   # printed decoded? might still be integer; better postprocess
+# save to CSV
+# df.to_csv("../../src/results/MPCtraining_results.csv", index=False)
 
-print_ln("von Doc")
-print_ln('%s', pred.reveal())
-print_ln("DONE")
-
-print_ln('%s', (pred - y_test.get_vector()).reveal())
-print_ln("DONE2")
+# print_ln("Normal predict")
+# log.fit(X_train, y_train)
+# print_ln('%s', (log.predict(X_test) - y_test.get_vector()).reveal())

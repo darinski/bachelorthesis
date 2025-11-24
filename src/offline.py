@@ -6,7 +6,7 @@ from sklearn.model_selection import train_test_split
 import numpy as np
 
 DEFAULT_SCALE = 2**16
-DEFAULT_P = 2**61 - 1
+DEFAULT_P = 1009
 DEFAULT_TEST_SIZE = 0.2
 OUTPUT_DIR = "Player-Data"
 DEFAULT_BATCH_SIZE = 1
@@ -61,7 +61,7 @@ def load_data(name):
 
 def additive_shares(x, p):
     """
-    Generate additive shares of x in Z_p such that s0 + s1 = x mod p
+    Generate additive shares of x in F_p such that s0 + s1 = x mod p
     """
     s0 = secrets.randbelow(p)
     s1 = (x - s0) % p
@@ -88,7 +88,8 @@ def save_shares(
                 # print(f"val={val}, row={i}, col={j}")
                 if j == n_cols - 1:
                     # last column is label, assume integer
-                    val = int(round(val))
+                    val = int(val)
+                    # print(f"Label value at row {i}: {val}")
                 else:
                     val = int(round(val * scale)) % p
                 s0, s1 = additive_shares(val, p)
@@ -129,12 +130,12 @@ if __name__ == "__main__":
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
     df = load_data(dataset_name)
-    df = df.iloc[:20, :]
+    df = df.iloc[:10, :]
     X = df.iloc[:, :-1]
     y = df.iloc[:, -1]
 
     X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=test_size, random_state=42
+        X, y, test_size=test_size, shuffle=False
     )
     train_data = pd.concat([X_train, y_train], axis=1)
     test_data = pd.concat([X_test, y_test], axis=1)
