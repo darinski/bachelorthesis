@@ -6,7 +6,7 @@ from sklearn.model_selection import train_test_split
 import numpy as np
 
 DEFAULT_SCALE = 2**16
-DEFAULT_P = 1009
+DEFAULT_P = 1009 
 DEFAULT_TEST_SIZE = 0.2
 OUTPUT_DIR = "Player-Data"
 DEFAULT_BATCH_SIZE = 1
@@ -132,7 +132,7 @@ if __name__ == "__main__":
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
     df = load_data(dataset_name)
-    df = df.iloc[:50, :]
+    df = df.iloc[:10, :]
     X = df.iloc[:, :-1]
     y = df.iloc[:, -1]
 

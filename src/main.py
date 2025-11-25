@@ -15,7 +15,7 @@ MP_SPDZ_SOURCE_DIR = MP_SPDZ_DIR / "Programs/Source"
 LOG_DIR = BASE_DIR / "logs"
 LOG_DIR.mkdir(exist_ok=True)
 
-BATCH_SIZES = [8, 32]
+BATCH_SIZES = [8] # , 32]
 EPOCH_NUMBERS = [2] # [5, 10, 20]
 CONDA_ENV_NAME = "thesis"
 
@@ -84,10 +84,6 @@ def setup_conda_env():
 def setup_mpspdz():
     if not MP_SPDZ_DIR.exists():
         print(f"[INFO] Cloning MP-SPDZ repository...")
-        subprocess.run(
-            ["git", "clone", "https://github.com/data61/MP-SPDZ.git", str(MP_SPDZ_DIR)],
-            check=True,
-        )
         subprocess.run(
             ["git", "clone", "https://github.com/data61/MP-SPDZ.git", str(MP_SPDZ_DIR)],
             check=True,
@@ -171,7 +167,7 @@ def run_mpc(dataset, batch_size, epochs):
         "-N",
         "2",
         "-pn",
-        "17539",
+        "17540",
         "-h",
         "localhost",
         "-v",
@@ -186,7 +182,7 @@ def run_mpc(dataset, batch_size, epochs):
         "-N",
         "2",
         "-pn",
-        "17539",
+        "17540",
         "-h",
         "localhost",
         "-v",
@@ -217,7 +213,7 @@ def run_mpc_parallel(dataset, batch_size, n_epochs):
             "-N",
             str(n_parties),
             "-pn",
-            "17539",
+            "17540",
             "-h",
             "localhost",
             "-v",
@@ -235,30 +231,40 @@ def run_mpc_parallel(dataset, batch_size, n_epochs):
         f.close()
 
 
-def run_mpc2(party_id, log_file):
+def run_mpc2(party_id, log_file, base_port):
     cmd = [
         "./mascot-party.x",
         str(party_id),
         MY_PROGRAM,
         "-N",
         "2",
-        "-pn",
-        "17539",
+        # "-pn",
+        # str(base_port),
         "-h",
         "localhost",
         "-v",
         "2",
     ]
 
-    with open(log_file, "w") as logfile:
-        process = subprocess.Popen(
-            cmd,
-            cwd=str(MP_SPDZ_DIR),
-            stdout=logfile,  # save ALL stdout
-            stderr=logfile,  # save ALL stderr
-            text=True,
-        )
+    logfile = open(log_file, "w")
 
+    # Start the process with stdout/stderr piped
+    process = subprocess.Popen(
+        cmd,
+        cwd=str(MP_SPDZ_DIR),
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+        bufsize=1,  # line-buffered
+    )
+
+    # Stream output both to terminal and file
+    for line in process.stdout:
+        print(line, end="")      # terminal
+        logfile.write(line)      # log file
+
+    process.wait()
+    logfile.close()
     return process
 
 
@@ -277,7 +283,7 @@ def main():
     #setup_mpspdz()  # clone MP-SPDZ if needed
     #build_mpspdz_runtime()  # build MP-SPDZ binaries
     prepare_sources()  # symlink/copy thesis.mpc, offline.py, etc.
-    # run_preprocessing("data/trainingPCS.csv")
+    run_preprocessing("trainingPCS")
     compile_mpc()  # compile MPC program once
 
     for csv_file in DATA_DIR.glob("train*.csv"):
@@ -302,8 +308,8 @@ def main():
                 # print("\n--- Running MPC parties in parallel ---")
                 # print(f"--- Running with batch size {bs} ---")
                 # print(f"--- Running with n_epochs {e} ---")
-                # p0 = run_mpc2(0, "party0.log")
-                # p1 = run_mpc2(1, "party1.log")
+                # p0 = run_mpc2(0, f"party0_b{bs}_e{e}_{dataset}.log", "17550")
+                # p1 = run_mpc2(1, f"party1_b{bs}_e{e}_{dataset}.log", "17550")
 
                 # p0.wait()
                 # p1.wait()

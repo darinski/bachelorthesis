@@ -1,9 +1,8 @@
-# Logistic Regression in MPC
+# Logistic Regression in MPC (raw CSV, single file)
 from Compiler.library import *
 from Compiler import ml
 import numpy as np
-
-
+import pandas as pd
 
 # =================================
 # Read metadata
@@ -17,88 +16,52 @@ with open("Player-Data/metadata.txt") as meta_f:
     n_epochs = int(meta_f.readline().strip())
 
 # secure rounding for fixed-point numbers
-
 sfix.set_precision(f=16, k=78)
 sfix.round_nearest = True
-
 
 print_ln("Loaded metadata: n_train=%s, d=%s, n_test=%s", n_train, d, n_test)
 
 # =================================
-# Loading Data
+# Load single CSV and split train/test
 # =================================
+data_df = pd.read_csv("../../data_small/trainingPCS.csv", header=None)
+data_np = data_df.to_numpy()
 
-train0 = np.loadtxt("Player-Data/Input-P0-0", dtype=np.int64)
-train1 = np.loadtxt("Player-Data/Input-P1-0", dtype=np.int64)
-test0 = np.loadtxt("Player-Data/Input-P0-1", dtype=np.int64)
-test1 = np.loadtxt("Player-Data/Input-P1-1", dtype=np.int64)
+# Determine train/test split
+train_np = data_np[:n_train, :]
+test_np  = data_np[n_train:n_train+n_test, :]
 
-
-# quick shape check for debugging (revealed to console)
-print_ln("Loaded shapes: train0=%s, train1=%s, test0=%s, test1=%s",
-         str(train0.shape), str(train1.shape), str(test0.shape), str(test1.shape))
-
-
-train_share0 = sint.input_tensor_via(0, train0)
-train_share1 = sint.input_tensor_via(1, train1)
-test_share0 = sint.input_tensor_via(0, test0)
-test_share1 = sint.input_tensor_via(1, test1)
-
-# reconstruct secret shared matrices
-train_secret = train_share0 + train_share1
-test_secret  = test_share0  + test_share1
-
-# print_ln("Sample train_secret[0] = %s", train_secret[0])
-
-
+print_ln("Train shape=%s, Test shape=%s", str(train_np.shape), str(test_np.shape))
 
 # =================================
-# Build X_train and y_train with FOR LOOPS
+# Build X/y matrices for MPC
 # =================================
-
 X_train = sfix.Matrix(n_train, d)
 y_train = sint.Array(n_train)
-
 for i in range(n_train):
     for j in range(d):
-        X_train[i][j] = train_secret[i][j]
-    y_train[i] = train_secret[i][d] 
-    # print_ln("y_train[%s] = %s", i, y_train[i].reveal())
-
-
-
-# =================================
-# Build X_test and y_test with FOR LOOPS
-# =================================
+        X_train[i][j] = sfix(train_np[i][j])
+    y_train[i] = sint(int(train_np[i][d]))  # last column is label
 
 X_test = sfix.Matrix(n_test, d)
 y_test = sint.Array(n_test)
-
 for i in range(n_test):
     for j in range(d):
-        X_test[i][j] = test_secret[i][j]
-    y_test[i] = test_secret[i][d] 
-
+        X_test[i][j] = sfix(test_np[i][j])
+    y_test[i] = sint(int(test_np[i][d]))
 
 # =================================
-# Helpers and Variables
+# Optional helper for MPC-safe sigmoid approximation
 # =================================
-
 def poly3(x):
-    # # # good for MPC, paper: SecureML (CCS 2017)
+    # Good for MPC (SecureML, CCS 2017)
     return sfix(0.5) + x * sfix(0.25)
-
-# x_sample = X_train[0][0]
-# print_ln("poly3(x_sample) = %s", poly3(x_sample))
 
 # =================================
 # Logistic Regression
 # =================================
-
+print_ln("X_train[0][0] = %s", X_train[0][0].reveal())
+print_ln("y_train[0] = %s", y_train[0].reveal())
 
 log = ml.SGDLogistic(n_epochs=n_epochs, batch_size=batch_size, program=program)
-print_ln("X_train[0][0] = %s", X_train[0][0].reveal())
 log.fit_with_testing(X_train, y_train, X_test, y_test)
-# pred = log.fit(X_train, y_train)
-
-# print_ln('%s', log.predict(X_test).reveal())
