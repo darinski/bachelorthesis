@@ -2,8 +2,12 @@
 __pycache__/
 *.py[cod]
 
+party*.log
 # Ignored data 
-
+log*/*
+data/
+data_testing/
+ignore src/mpc/*
 
 # Ignore third_party elements
 third_party/MP-SPDZ/

@@ -1,103 +1,65 @@
-# Bachelor Thesis
+# Privacy-Preserving Neural Network Training with MP-SPDZ
 
-This repository contains the implementation of my bachelor thesis.  
-**Title:** _"Privacy-Preserving Logistic Regression Training using Multi-Party Computation in a Malicious Setting"_
+This repository implements an **end-to-end MPC (Secure Multi-Party Computation) machine-learning pipeline** based on the **MP-SPDZ** framework.  
+It allows private neural-network training using secret sharing, without revealing raw data to any party.
 
-_Chair of Theoretical Computer Science_  
-_University of Mannheim_
+The system was developed and tested primarily on **macOS**, but it also works on **Ubuntu/Linux** with minor adjustments.
 
-## Structure
+---
 
--   `data/` - raw and processed data used for training (ignored in Git)
--   `results/`- results, figures, and analysis outputs
--   `src/` - implementation (data preprocessing, MPC, training, evaluation, etc.)
--   `tests/`- unit tests
+## Project Overview
 
-## Data Requirements
+The repository contains:
 
--
+- **Preprocessing pipeline** (`offline.py`)  
+  Converts a CSV dataset into **additive shares** in the ring ℤ₂⁶⁴ for MP-SPDZ.
 
-## MP-SPDZ
+- **Neural network in MPC** (`thesis.mpc`)  
+  A custom MP-SPDZ program implementing model forward, backward, SGD, and accuracy evaluation.
 
-cd ..
-git clone https://github.com/data61/MP-SPDZ.git
-cd MP-SPDZ
-make -j8
-make libote
+- **Experiment manager** (`main.py`)  
+  Automates preprocessing → metadata generation → compilation → MPC execution → logging.
 
-To run the repo the creation of a my*mpc file (name changeable) is necessary.
-For that, after cloning the MP-SPDZ repo from github in a third_party folder run from inside *third_party/MP-SPDZ/Programs/Source* following command:
+- **Log analysis tool** (`read_log.py`)  
+  Extracts timing, triple usage, communication cost, and accuracy metrics.
 
-```bash
-ln -s ../../../../src/mpc my_mpc
-```
-To check if everything went right run **ls -l** and check for 
-```bash
-my_mpc -> ../../../../src/mpc
-```
+- **MP-SPDZ runtime** (cloned into `third_party/MP-SPDZ`)
 
-Also, make sure you have following structure of your Repo (some folders aren't shown for iverview reasons):
+- **Generated data** under `Player-Data/`
+
+- **Logs** under `logs/`
+
+---
+
+## Directory Structure
+
 ```text
 bachelorthesis
-- .venv/
-- data
+- data_small
 -- trainingLBW.csv
+-- trainingPCS.csv
+-- trainingUIS.csv
 -src
--- mpc
---- convert_to_mpspdz.mpc
--- preprocessing
---- datasetLoader.py
+- results
+- main.py
+- offline.py
+- read_log.py
+- thesis.mpc
 - third_party
 -- MP_SPDZ
---- Programs
----- Source
------ my_mpc
-------convert_to_mpspdz.mpc
---- Scripts
 ```
 
-With that you should be able to run compile the convert_to_mpspdz.mpc file in the src/mpc folder with like following:
-In **/bachelorthesis/src/mpc** run:
+---
+
+## System Requirements
+
+### macOS (recommended)
+Development and testing was done on macOS.  
+Some commands (esp. the `script` logging tool) use macOS/BSD syntax.
+
+Install dependencies with Homebrew:
+
 ```bash
-../../third_party/MP-SPDZ/Scripts/compile-run.py -E ring my_mpc/convert_to_mpspdz
-```
-
-### OT
-
-In third_party folder execute
-```bash
-brew install cmake # in bacherlorthesis folder
-git clone https://github.com/osu-crypto/libOTe.git # in third_party folder 
-cd libOTe 
-git submodule update --init --recursive # in libOTe folder
-python3 build.py --all --boost --sodium # in libOTe folder
-# tell MP-SPDZ where libOTe lives
-export LIBOTE_ROOT=~/bachelorthesis/third_party/libOTe 
-export CRYPTOTOOLS_ROOT=~/bachelorthesis/third_party/libOTe/cryptoTools
-
-```
-[Github libOTe for more details](https://github.com/osu-crypto/libOTe)
+brew install cmake automake libtool boost gmp ntl libsodium openssl llvm git python
 
 
-
-In MPC folder execute
-```bash
-make -j8
-make libote
-```
-
-
-### Example Run tutorial
-in *~/git/bachelorthesis/third_party/MP-SPDZ*
-- **terminal 0**
-```bash
-./compile.py tutorial 
-```
-- **terminal 1** 
-```bash
-./mascot-party.x -p 0 -N 2 --ip-file-name hosts.txt -pn 6000 tutorial 
-```
-- **terminal 2**
-```bash
-./mascot-party.x -p 1 -N 2 --ip-file-name hosts.txt -pn 6000 tutorial 
-```
