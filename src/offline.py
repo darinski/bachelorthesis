@@ -22,6 +22,8 @@ def create_metafile(n_rows_train, n_cols, n_rows_test):
         meta_f.write(f"{n_rows_train}\n")  # number of train data rows
         meta_f.write(f"{n_cols-1}\n")  # number of features
         meta_f.write(f"{n_rows_test}\n")  # number of test data rows
+        meta_f.write("8\n")  # a default batch size so no error occurs in main.py
+        meta_f.write("1\n")  # a default n_epoch so no error occurs in main.py
 
     print(
         f"[create_metafile] n_rows_train={n_rows_train}, n_cols={n_cols-1}, n_rows_test={n_rows_test}"
@@ -130,7 +132,7 @@ if __name__ == "__main__":
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
     df = load_data(dataset_name)
-    df = df.iloc[:10, :]
+    df = df.iloc[:, :]
     X = df.iloc[:, :-1]
     y = df.iloc[:, -1]
 

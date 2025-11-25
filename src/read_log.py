@@ -2,7 +2,7 @@ import re
 import os
 
 # print(os.listdir('.'))
-logfile = "third_party/MP-SPDZ/output_test.log"
+logfile = "logs/trainingPCS_b8_p0.log"
 with open(logfile, "r") as f:
     log_text = f.read()
 

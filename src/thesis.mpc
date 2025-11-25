@@ -14,7 +14,8 @@ with open("Player-Data/metadata.txt") as meta_f:
     n_train = int(meta_f.readline().strip())
     d = int(meta_f.readline().strip())
     n_test = int(meta_f.readline().strip())
-    
+    batch_size = int(meta_f.readline().strip())
+    n_epochs = int(meta_f.readline().strip())
 
 # secure rounding for fixed-point numbers
 
@@ -111,11 +112,17 @@ def poly3(x):
 # =================================
 # Logistic Regression
 # =================================
-import os
+
+
+
+
+# config = open("config.txt")
+# batch_size = sint(config.read_number())
+# config.close()
 
 # batch_size = int(os.getenv("THESIS_BATCH", "50"))
-log = ml.SGDLogistic(n_epochs=3, batch_size=8, program=program)
-# log.sigmoid = poly3
+log = ml.SGDLogistic(n_epochs=n_epochs, batch_size=batch_size, program=program)
+log.sigmoid = poly3
 
 
 # If y_train is sfix or sint
