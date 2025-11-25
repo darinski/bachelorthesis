@@ -1,65 +1,70 @@
-# Privacy-Preserving Neural Network Training with MP-SPDZ
+# Privacy-Preserving Logistic Regression with MP-SPDZ
 
-This repository implements an **end-to-end MPC (Secure Multi-Party Computation) machine-learning pipeline** based on the **MP-SPDZ** framework.  
-It allows private neural-network training using secret sharing, without revealing raw data to any party.
+This repository contains the implementation developed as part of a bachelor thesis on privacy-preserving logistic regression using Secure Multi-Party Computation (MPC).  
+The core protocol is **MASCOT** executed within the **MP-SPDZ** framework, targeting a **malicious adversary model** in a dishonest-majority setting.
 
-The system was developed and tested primarily on **macOS**, but it also works on **Ubuntu/Linux** with minor adjustments.
-
----
-
-## Project Overview
-
-The repository contains:
-
-- **Preprocessing pipeline** (`offline.py`)  
-  Converts a CSV dataset into **additive shares** in the ring ℤ₂⁶⁴ for MP-SPDZ.
-
-- **Neural network in MPC** (`thesis.mpc`)  
-  A custom MP-SPDZ program implementing model forward, backward, SGD, and accuracy evaluation.
-
-- **Experiment manager** (`main.py`)  
-  Automates preprocessing → metadata generation → compilation → MPC execution → logging.
-
-- **Log analysis tool** (`read_log.py`)  
-  Extracts timing, triple usage, communication cost, and accuracy metrics.
-
-- **MP-SPDZ runtime** (cloned into `third_party/MP-SPDZ`)
-
-- **Generated data** under `Player-Data/`
-
-- **Logs** under `logs/`
+The implementation trains and evaluates logistic regression on **secret-shared data**, using fixed-point arithmetic and a polynomial approximation of the sigmoid function. Results are compared against a plaintext baseline outside of MPC.
 
 ---
 
-## Directory Structure
+## Table of Contents
 
-```text
-bachelorthesis
-- data_small
--- trainingLBW.csv
--- trainingPCS.csv
--- trainingUIS.csv
--src
-- results
-- main.py
-- offline.py
-- read_log.py
-- thesis.mpc
-- third_party
--- MP_SPDZ
-```
+- [Overview](#overview)  
+- [Repository Structure](#repository-structure)  
+- [System Requirements](#system-requirements)  
+- [Installation](#installation)  
+- [Running the Pipeline](#running-the-pipeline)  
+- [Data and File Formats](#data-and-file-formats)  
+- [Implementation Details](#implementation-details)  
+- [Notes](#notes)  
+- [License](#license)
 
 ---
 
-## System Requirements
+## Overview
 
-### macOS (recommended)
-Development and testing was done on macOS.  
-Some commands (esp. the `script` logging tool) use macOS/BSD syntax.
+The goal of this project is to implement and evaluate **logistic regression under MPC** using:
 
-Install dependencies with Homebrew:
+- the **MASCOT** protocol for offline preprocessing (Beaver triples, MAC material, correlated randomness),  
+- the **MP-SPDZ** framework for MPC execution,  
+- **fixed-point arithmetic** (`sfix`) and a **polynomial sigmoid approximation** for efficient secure computation.
 
-```bash
-brew install cmake automake libtool boost gmp ntl libsodium openssl llvm git python
+The implementation focuses on:
+
+- privacy-preserving training and prediction,  
+- separation of **offline** (preprocessing) and **online** (secure computation) phases,  
+- comparability with a **plaintext logistic regression baseline**.
+
+macOS was used for development and evaluation, particularly because some log-reading scripts and terminal commands are tailored to macOS. Linux should also work with small adjustments.
+
+---
 
 
+
+## On Debian/Ubuntu Linux, install the dependencies recommended by MP-SPDZ
+sudo apt-get install automake build-essential clang cmake git \
+    libboost-dev libboost-filesystem-dev libboost-iostreams-dev \
+    libboost-thread-dev libgmp-dev libntl-dev libsodium-dev \
+    libssl-dev libtool python3
+
+
+On macOS, you can install comparable packages via Homebrew:
+brew install cmake git boost gmp ntl libsodium openssl libtool python
+
+
+Python / Conda
+It is recommended to use Miniconda to manage the Python environment.
+Install Miniconda:
+https://docs.conda.io/en/latest/miniconda.html
+Create and activate an environment:
+
+conda create -n mp-spdz python=3.10
+conda activate mp-spdz
+
+pip install numpy pandas
+
+
+
+# Running the Program:
+conda activate mp-spdz
+python src/offline.py
