@@ -2,7 +2,6 @@
 from Compiler.library import *
 from Compiler import ml
 import numpy as np
-import pandas as pd
 
 
 
@@ -31,45 +30,26 @@ print_ln("Loaded metadata: n_train=%s, d=%s, n_test=%s", n_train, d, n_test)
 
 train0 = np.loadtxt("Player-Data/Input-P0-0", dtype=np.int64)
 train1 = np.loadtxt("Player-Data/Input-P1-0", dtype=np.int64)
-# train0 = pd.read_csv("Player-Data/Input-P0-0", sep=" ", header=None, dtype=int).values
-# train1 = pd.read_csv("Player-Data/Input-P1-0", sep=" ", header=None, dtype=int).values
 test0 = np.loadtxt("Player-Data/Input-P0-1", dtype=np.int64)
 test1 = np.loadtxt("Player-Data/Input-P1-1", dtype=np.int64)
 
-# print_ln(train0)
 
 # quick shape check for debugging (revealed to console)
 print_ln("Loaded shapes: train0=%s, train1=%s, test0=%s, test1=%s",
          str(train0.shape), str(train1.shape), str(test0.shape), str(test1.shape))
 
-# print_ln(train0)
 
 train_share0 = sint.input_tensor_via(0, train0)
 train_share1 = sint.input_tensor_via(1, train1)
 test_share0 = sint.input_tensor_via(0, test0)
 test_share1 = sint.input_tensor_via(1, test1)
 
-# train_share0 = sint.input_tensor_via(0, train0)
-# train_share1 = sint.input_tensor_via(1, train1)
-# test_share0 = sint.input_tensor_via(0, test0)
-# test_share1 = sint.input_tensor_via(1, test1)
-# print_ln("%s", train_share0.reveal())
-
 # reconstruct secret shared matrices
 train_secret = train_share0 + train_share1
 test_secret  = test_share0  + test_share1
 
-# # For train_share0
-# train_share0_clear = train_share0.reveal_list()
-# print_ln("train_share0 = %s", train_share0_clear)
+# print_ln("Sample train_secret[0] = %s", train_secret[0])
 
-# # For train_share1
-# train_share1_clear = train_share1.reveal_list()
-# print_ln("train_share1 = %s", train_share1_clear)
-
-# # For train_secret
-# train_secret_clear = train_secret.reveal_list()
-# print_ln("train_secret = %s", train_secret_clear)
 
 
 # =================================
@@ -108,39 +88,17 @@ def poly3(x):
     # # # good for MPC, paper: SecureML (CCS 2017)
     return sfix(0.5) + x * sfix(0.25)
 
+# x_sample = X_train[0][0]
+# print_ln("poly3(x_sample) = %s", poly3(x_sample))
 
 # =================================
 # Logistic Regression
 # =================================
 
 
-
-
-# config = open("config.txt")
-# batch_size = sint(config.read_number())
-# config.close()
-
-# batch_size = int(os.getenv("THESIS_BATCH", "50"))
 log = ml.SGDLogistic(n_epochs=n_epochs, batch_size=batch_size, program=program)
-log.sigmoid = poly3
-
-
-# If y_train is sfix or sint
-# y_train_clear = y_train.reveal()  # returns Python list of floats or ints
-# print_ln("y_train = %s", y_train_clear)
-
-
-# print_ln("Fit with test")
-
+print_ln("X_train[0][0] = %s", X_train[0][0].reveal())
 log.fit_with_testing(X_train, y_train, X_test, y_test)
+# pred = log.fit(X_train, y_train)
 
-
-# convert dict of lists to DataFrame
-# df = pd.DataFrame(results)
-
-# save to CSV
-# df.to_csv("../../src/results/MPCtraining_results.csv", index=False)
-
-# print_ln("Normal predict")
-# log.fit(X_train, y_train)
-# print_ln('%s', (log.predict(X_test) - y_test.get_vector()).reveal())
+# print_ln('%s', log.predict(X_test).reveal())

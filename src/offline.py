@@ -6,7 +6,7 @@ from sklearn.model_selection import train_test_split
 import numpy as np
 
 DEFAULT_SCALE = 2**16
-DEFAULT_P = 1009
+DEFAULT_P = 2**64 - 59 
 DEFAULT_TEST_SIZE = 0.2
 OUTPUT_DIR = "Player-Data"
 DEFAULT_BATCH_SIZE = 1
@@ -23,7 +23,7 @@ def create_metafile(n_rows_train, n_cols, n_rows_test):
         meta_f.write(f"{n_cols-1}\n")  # number of features
         meta_f.write(f"{n_rows_test}\n")  # number of test data rows
         meta_f.write("8\n")  # a default batch size so no error occurs in main.py
-        meta_f.write("1\n")  # a default n_epoch so no error occurs in main.py
+        meta_f.write("2\n")  # a default n_epoch so no error occurs in main.py
 
     print(
         f"[create_metafile] n_rows_train={n_rows_train}, n_cols={n_cols-1}, n_rows_test={n_rows_test}"
@@ -40,7 +40,7 @@ def load_data(name):
     root = None
 
     while current != current.root:
-        if (current / "data").exists():
+        if (current / "data_small").exists():
             root = current
             break
         current = current.parent
@@ -51,8 +51,8 @@ def load_data(name):
             f"Walked parents: {list(script_path.parents)}"
         )
 
-    data_path = root / "data" / f"{name}.csv"
-
+    data_path = root / "data_small" / f"{name}.csv"
+    
     if not data_path.exists():
         raise FileNotFoundError(f"Dataset not found: {data_path}\n")
 
@@ -132,7 +132,7 @@ if __name__ == "__main__":
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
     df = load_data(dataset_name)
-    df = df.iloc[:, :]
+    df = df.iloc[:50, :]
     X = df.iloc[:, :-1]
     y = df.iloc[:, -1]
 
